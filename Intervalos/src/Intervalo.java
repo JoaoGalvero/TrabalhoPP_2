@@ -5,6 +5,7 @@ public class Intervalo {
     private boolean chaveInicio; //[ == true e ( == false
     private boolean chaveFim; //] == true e ) == false
     private int[] valoresIntervalo;
+    private int totalValoresCache; // Cache para o total de valores
 
     // Construtor
     public Intervalo(char chave1, int inicio, int fim, char chave2) {
@@ -12,7 +13,8 @@ public class Intervalo {
         this.setFim(fim);
         this.setInicioInclusivo(verifica(chave1));
         this.setFimInclusivo(verifica(chave2));
-        this.setValoresIntervalo(primeiroValorIntervalo(), ultimoValorIntervalo(), totalValores());
+        this.setTotalValoresCache((ultimoValorIntervalo() - primeiroValorIntervalo() + 1));
+        this.setValoresIntervalo(primeiroValorIntervalo(), ultimoValorIntervalo(), getTotalValoresCache());
     }
 
     // Getters
@@ -32,17 +34,21 @@ public class Intervalo {
         return this.chaveFim;
     }
 
-    public int[] getvaloresIntervalo(){
+    public int[] getValoresIntervalo() {
         return this.valoresIntervalo;
+    }
+
+    public int getTotalValoresCache() {
+        return totalValoresCache;
     }
 
     // Setters
     public void setInicio(int inicio) {
-            this.inicio = inicio;
+        this.inicio = inicio;
     }
 
     public void setFim(int fim) {
-            this.fim = fim;
+        this.fim = fim;
     }
 
     public void setInicioInclusivo(boolean ver) {
@@ -54,13 +60,20 @@ public class Intervalo {
     }
 
     public void setValoresIntervalo(int primeiro, int ultimo, int total) {
-        int[] v = new int[total];
-        for (int i = 0; i < total; i++) {
-            v[i] = primeiro + i;
+        if (total <= 0) {
+            this.valoresIntervalo = null;
+        } else {
+            int[] array = new int[total];
+            for (int i = 0; i < total; i++) {
+                array[i] = primeiro + i;
+            }
+            this.valoresIntervalo = array;
         }
-        this.valoresIntervalo = v;
     }
-    
+
+    public void setTotalValoresCache(int totalValoresCache) {
+        this.totalValoresCache = totalValoresCache;
+    }
 
     // Métodos Personalizados (Pedidos na implementação do trabalho)
 
@@ -70,8 +83,8 @@ public class Intervalo {
                (this.chaveInicio && valor == this.inicio) || 
                (this.chaveFim && valor == this.fim));
     }
-    
-   // (b)
+
+    // (b)
     public boolean intercepta(Intervalo b) {
         int inicioA = this.primeiroValorIntervalo();
         int fimA = this.ultimoValorIntervalo();
@@ -83,12 +96,12 @@ public class Intervalo {
     }
 
     // (c)
-    public int media(){
-        int media = 0;
-        for(int i = 0; i < totalValores(); i++){
+    public double media() {
+        double media = 0;
+        for (int i = 0; i < totalValoresCache; i++) {
             media += valoresIntervalo[i];
         }
-        return (media/totalValores());
+        return (media / totalValoresCache);
     }
 
     // (d)
@@ -103,108 +116,92 @@ public class Intervalo {
         int p3 = supa * infb;
         int p4 = supa * supb;
 
-        int novoLimiteInferior = min(min(p1, p2), min(p3, p4));
-        int novoLimiteSuperior = max(max(p1, p2), max(p3, p4));
+        int novoLimiteInferior = Math.min(Math.min(p1, p2), Math.min(p3, p4));
+        int novoLimiteSuperior = Math.max(Math.max(p1, p2), Math.max(p3, p4));
 
         return new Intervalo('[', novoLimiteInferior, novoLimiteSuperior, ']');
     }
 
     // (e)
     public Intervalo uniao(Intervalo b) {
-        Intervalo c = new Intervalo('(', 1, 2 ,')');
-        if (this.intercepta(b)){
-            int primeiroValor = this.primeiroValorIntervalo() <= b.primeiroValorIntervalo()? this.primeiroValorIntervalo() : b.primeiroValorIntervalo();
-            int ultimoValor = this.ultimoValorIntervalo() >= b.ultimoValorIntervalo()? this.ultimoValorIntervalo() : b.ultimoValorIntervalo();
-            boolean chaveInicio = primeiroValor == this.primeiroValorIntervalo()? this.chaveInicio : b.chaveInicio;
-            boolean chaveFim = ultimoValor == this.ultimoValorIntervalo()? this.chaveFim : b.chaveFim;
+        if (this.intercepta(b)) {
+            int primeiroValor = this.primeiroValorIntervalo() <= b.primeiroValorIntervalo() ? this.inicio : b.inicio;
+            int ultimoValor = this.ultimoValorIntervalo() >= b.ultimoValorIntervalo() ? this.fim : b.fim;
+            boolean chaveInicio = primeiroValor == this.inicio ? this.chaveInicio : b.chaveInicio;
+            boolean chaveFim = ultimoValor == this.fim ? this.chaveFim : b.chaveFim;
 
-            c.setInicio(primeiroValor);
-            c.setFim(ultimoValor);
-            c.setInicioInclusivo(chaveInicio);
-            c.setFimInclusivo(chaveFim);
-            c.setValoresIntervalo(primeiroValor, ultimoValor, totalValores());
+            Intervalo c = new Intervalo((chaveInicio? '[' : '('), primeiroValor, ultimoValor , (chaveFim? ']' : ')'));
+
+            System.out.print("União: ");
+            c.imprimeRep();
             return c;
-        }
-        else{
-            return c;
+        } else {
+            System.out.print("União (sem interseção): ");
+            this.imprimeRep();
+            System.out.print("+");
+            b.imprimeRep();
+            return new Intervalo('(', 0, 0 ,')');
         }
     }
-    
-    
 
-    //Métodos Personalizados (Criados para facilitar algum processo do meu programa)
+    // Métodos Personalizados (Criados para facilitar algum processo do meu programa)
 
-    //Método que verifica as chaves
-    private boolean verifica(char chave){
-        if (chave == '[' || chave == ']'){
+    // Método que verifica as chaves
+    private boolean verifica(char chave) {
+        if (chave == '[' || chave == ']') {
             return true;
-        }
-        else if (chave == '(' || chave == ')'){
+        } else if (chave == '(' || chave == ')') {
             return false;
-        }
-        else{
+        } else {
             System.out.println("Não obedece os critérios das notações de intervalo. Por padrão, será usado (x, y)");
             return false;
         }
     }
 
-    //Método que retorna o primeiro inteiro incluído no intervalo
-    private int primeiroValorIntervalo(){
-        if(getChaveInicio()){
+    // Método que retorna o primeiro inteiro incluído no intervalo
+    private int primeiroValorIntervalo() {
+        if (getChaveInicio()) {
             return this.inicio;
-        }
-        else{
-            return (this.inicio+1);
+        } else {
+            return (this.inicio + 1);
         }
     }
 
-    //Método que retorna o último inteiro incluído no intervalo
-    private int ultimoValorIntervalo(){
-        if(getChaveFim()){
+    // Método que retorna o último inteiro incluído no intervalo
+    private int ultimoValorIntervalo() {
+        if (getChaveFim()) {
             return this.fim;
-        }
-        else{
-            return (this.fim-1);
+        } else {
+            return (this.fim - 1);
         }
     }
 
-    //Método que retorna o total de inteiros incluídos no intervalo
-    private int totalValores(){
-        return (ultimoValorIntervalo() - primeiroValorIntervalo() + 1);
-    }
-
-    //Método que imprime os inteiros incluídos no intervalo
-    public void imprimeIntervalo(){
-        int total = totalValores();
-        int i = 0;
-        System.out.print("[");
-        while(i < total){
-            if(i != total-1){
-                System.out.print(valoresIntervalo[i] + ", ");
-                i++;
-            }
-            else{
-            System.out.print(valoresIntervalo[i] + "]");
-            i++;
+    // Método que imprime os inteiros incluídos no intervalo
+    public void imprimeIntervalo() {
+        if (this.valoresIntervalo == null || this.getTotalValoresCache() == 0) {
+            System.out.println("\nIntervalo vazio");
+        } else {
+            int total = this.getTotalValoresCache();
+            int i = 0;
+            System.out.print("\n[");
+            while (i < total) {
+                if (i != total - 1) {
+                    System.out.print(valoresIntervalo[i] + ", ");
+                    i++;
+                } else {
+                    System.out.print(valoresIntervalo[i] + "] ");
+                    i++;
+                }
             }
         }
     }
 
-    // Método para encontrar o menor valor entre dois números
-    private int min(int a, int b) {
-        if (a < b) {
-            return a;
-        } else {
-            return b;
-        }
-    }
-
-    // Método para encontrar o maior valor entre dois números
-    private int max(int a, int b) {
-        if (a > b) {
-            return a;
-        } else {
-            return b;
-        }
+    // Método que imprime a representação do intervalo
+    public void imprimeRep() {
+        System.out.print(this.getChaveInicio() ? "[" : "(");
+        System.out.print(this.getInicio());
+        System.out.print(", ");
+        System.out.print(this.getFim());
+        System.out.print(this.getChaveFim() ? "]" : ")");
     }
 }
