@@ -72,19 +72,69 @@ public class Intervalo {
     }
     
    // (b)
-    public boolean intercepta(Intervalo outro) {
-        int inicioAtual = this.primeiroValorIntervalo();
-        int fimAtual = this.ultimoValorIntervalo();
+    public boolean intercepta(Intervalo b) {
+        int inicioA = this.primeiroValorIntervalo();
+        int fimA = this.ultimoValorIntervalo();
 
-        int inicioOutro = outro.primeiroValorIntervalo();
-        int fimOutro = outro.ultimoValorIntervalo();
+        int inicioB = b.primeiroValorIntervalo();
+        int fimB = b.ultimoValorIntervalo();
 
-        return !(fimAtual < inicioOutro || fimOutro < inicioAtual);
+        return !(fimA < inicioB || fimB < inicioA);
     }
+
+    // (c)
+    public int media(){
+        int media = 0;
+        for(int i = 0; i < totalValores(); i++){
+            media += valoresIntervalo[i];
+        }
+        return (media/totalValores());
+    }
+
+    // (d)
+    public Intervalo produto(Intervalo b) {
+        int infa = this.primeiroValorIntervalo();
+        int supa = this.ultimoValorIntervalo();
+        int infb = b.primeiroValorIntervalo();
+        int supb = b.ultimoValorIntervalo();
+
+        int p1 = infa * infb;
+        int p2 = infa * supb;
+        int p3 = supa * infb;
+        int p4 = supa * supb;
+
+        int novoLimiteInferior = min(min(p1, p2), min(p3, p4));
+        int novoLimiteSuperior = max(max(p1, p2), max(p3, p4));
+
+        return new Intervalo('[', novoLimiteInferior, novoLimiteSuperior, ']');
+    }
+
+    // (e)
+    public Intervalo uniao(Intervalo b) {
+        Intervalo c = new Intervalo('(', 1, 2 ,')');
+        if (this.intercepta(b)){
+            int primeiroValor = this.primeiroValorIntervalo() <= b.primeiroValorIntervalo()? this.primeiroValorIntervalo() : b.primeiroValorIntervalo();
+            int ultimoValor = this.ultimoValorIntervalo() >= b.ultimoValorIntervalo()? this.ultimoValorIntervalo() : b.ultimoValorIntervalo();
+            boolean chaveInicio = primeiroValor == this.primeiroValorIntervalo()? this.chaveInicio : b.chaveInicio;
+            boolean chaveFim = ultimoValor == this.ultimoValorIntervalo()? this.chaveFim : b.chaveFim;
+
+            c.setInicio(primeiroValor);
+            c.setFim(ultimoValor);
+            c.setInicioInclusivo(chaveInicio);
+            c.setFimInclusivo(chaveFim);
+            c.setValoresIntervalo(primeiroValor, ultimoValor, totalValores());
+            return c;
+        }
+        else{
+            return c;
+        }
+    }
+    
+    
 
     //Métodos Personalizados (Criados para facilitar algum processo do meu programa)
 
-    //Função que verifica as chaves
+    //Método que verifica as chaves
     private boolean verifica(char chave){
         if (chave == '[' || chave == ']'){
             return true;
@@ -98,7 +148,7 @@ public class Intervalo {
         }
     }
 
-    //Função que retorna o primeiro inteiro incluído no intervalo
+    //Método que retorna o primeiro inteiro incluído no intervalo
     private int primeiroValorIntervalo(){
         if(getChaveInicio()){
             return this.inicio;
@@ -108,7 +158,7 @@ public class Intervalo {
         }
     }
 
-    //Função que retorna o último inteiro incluído no intervalo
+    //Método que retorna o último inteiro incluído no intervalo
     private int ultimoValorIntervalo(){
         if(getChaveFim()){
             return this.fim;
@@ -118,27 +168,43 @@ public class Intervalo {
         }
     }
 
-    //Função que retorna o total de inteiros incluídos no intervalo
+    //Método que retorna o total de inteiros incluídos no intervalo
     private int totalValores(){
         return (ultimoValorIntervalo() - primeiroValorIntervalo() + 1);
     }
 
-    //Função que imprime os inteiros incluídos no intervalo
+    //Método que imprime os inteiros incluídos no intervalo
     public void imprimeIntervalo(){
-        int[] v = getvaloresIntervalo();
         int total = totalValores();
         int i = 0;
         System.out.print("[");
         while(i < total){
             if(i != total-1){
-                System.out.print(v[i] + ", ");
+                System.out.print(valoresIntervalo[i] + ", ");
                 i++;
             }
             else{
-            System.out.print(v[i]);
+            System.out.print(valoresIntervalo[i] + "]");
             i++;
             }
         }
-        System.out.print("]");
+    }
+
+    // Método para encontrar o menor valor entre dois números
+    private int min(int a, int b) {
+        if (a < b) {
+            return a;
+        } else {
+            return b;
+        }
+    }
+
+    // Método para encontrar o maior valor entre dois números
+    private int max(int a, int b) {
+        if (a > b) {
+            return a;
+        } else {
+            return b;
+        }
     }
 }
