@@ -49,7 +49,7 @@ Os testes foram realizados no arquivo `Main.java`, que inclui:
 
 ## Autor
 
-- Desenvolvido por [Seu Nome ou Equipe].
+- Desenvolvido por João Pedro Galvero Corrêa para a Matéria Paradigmas da Programação ministrada pelo professor Carlos Bazilio.
 
 ## Licença
 
@@ -57,5 +57,5 @@ Este projeto é de uso livre para fins acadêmicos e educacionais.
 
 ---
 
-**Nota**: Sinta-se à vontade para editar este arquivo caso deseje incluir mais detalhes ou ajustar as informações.
+Obs: README.md gerado pelo ChatGPT-v4 e revisada pelo desenvolvedor.
 
