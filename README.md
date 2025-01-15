@@ -57,5 +57,5 @@ Este projeto é de uso livre para fins acadêmicos e educacionais.
 
 ---
 
-Obs: README.md gerado pelo ChatGPT-v4 e revisada pelo desenvolvedor.
+Obs: Arquivo README.md gerado pelo ChatGPT-v4, e revisado pelo desenvolvedor.
 
