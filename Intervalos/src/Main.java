@@ -8,7 +8,7 @@ public class Main {
         System.out.println("\nMédia do Intervalo 1: " + intervalo1.media());  // Testando média
 
         // Testando o segundo intervalo (8, 15)
-        Intervalo intervalo2 = new Intervalo('(', 8, 15, ')');
+        Intervalo intervalo2 = new Intervalo('(', 8, 14, ')');
         System.out.print("\nIntervalo 2: ");
         intervalo2.imprimeRep();  // Verificando a representação
         intervalo2.imprimeIntervalo();  // Imprimindo os valores do intervalo
