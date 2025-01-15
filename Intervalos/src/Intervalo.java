@@ -1,34 +1,18 @@
 public class Intervalo {
+    // Atributos
     private int inicio;
     private int fim;
-    private boolean inicioInclusivo;
-    private boolean fimInclusivo;
+    private boolean chaveInicio; //[ == true e ( == false
+    private boolean chaveFim; //] == true e ) == false
+    private int[] valoresIntervalo;
 
     // Construtor
-    public Intervalo(char inicioSimbolo, int inicio, int fim, char fimSimbolo) {
-        if (inicioSimbolo == '[') { //VERIFICAÇÃO DO ( ou [ DO ÍNICIO
-            this.inicioInclusivo = true;
-        } else if (inicioSimbolo == '(') {
-            this.inicioInclusivo = false;
-        } else {
-            System.out.println("Símbolo de início inválido. Use '[' ou '('");
-        }
-
-        if (fimSimbolo == ']') { //VERIFICAÇÃO DO ) ou ] DO FIM
-            this.fimInclusivo = true;
-        } else if (fimSimbolo == ')') {
-            this.fimInclusivo = false;
-        } else {
-            System.out.println("Símbolo de fim inválido. Use ']' ou ')'");
-        }
-
-        if (inicio > fim) { //VERIFICAÇÃO SE INÍCIO MAIOR FIM
-            System.out.println("O valor de início não pode ser maior que o valor de fim.");
-        }
-        else {
-        this.inicio = inicio;
-        this.fim = fim;
-        }
+    public Intervalo(char chave1, int inicio, int fim, char chave2) {
+        this.setInicio(inicio);
+        this.setFim(fim);
+        this.setInicioInclusivo(verifica(chave1));
+        this.setFimInclusivo(verifica(chave2));
+        this.setValoresIntervalo(primeiroValorIntervalo(), ultimoValorIntervalo(), totalValores());
     }
 
     // Getters
@@ -40,63 +24,121 @@ public class Intervalo {
         return this.fim;
     }
 
-    public boolean isInicioInclusivo() {
-        return this.inicioInclusivo;
+    public boolean getChaveInicio() {
+        return this.chaveInicio;
     }
 
-    public boolean isFimInclusivo() {
-        return this.fimInclusivo;
+    public boolean getChaveFim() {
+        return this.chaveFim;
+    }
+
+    public int[] getvaloresIntervalo(){
+        return this.valoresIntervalo;
     }
 
     // Setters
     public void setInicio(int inicio) {
-        if (inicio > this.fim) {
-            System.out.println("O valor de início não pode ser maior que o valor de fim.");
-        } else {
             this.inicio = inicio;
-        }
     }
 
     public void setFim(int fim) {
-        if (fim < this.inicio) {
-            System.out.println("O valor de fim não pode ser menor que o valor de início.");
-        } else {
             this.fim = fim;
-        }
     }
 
-    public void setInicioInclusivo(char inicioSimbolo) {
-        if (inicioSimbolo == '[') {
-            this.inicioInclusivo = true;
-        } else if (inicioSimbolo == '(') {
-            this.inicioInclusivo = false;
-        } else {
-            System.out.println("Símbolo de início inválido. Use '[' ou '('");
-        }
+    public void setInicioInclusivo(boolean ver) {
+        this.chaveInicio = ver;
     }
 
-    public void setFimInclusivo(char fimSimbolo) {
-        if (fimSimbolo == ']') {
-            this.fimInclusivo = true;
-        } else if (fimSimbolo == ')') {
-            this.fimInclusivo = false;
-        } else {
-            System.out.println("Símbolo de fim inválido. Use ']' ou ')'");
-        }
+    public void setFimInclusivo(boolean ver) {
+        this.chaveFim = ver;
     }
 
-    //Métodos Personalizados
-    public boolean contém(int valor){
-        if(this.inicio < valor && valor < this.fim){
+    public void setValoresIntervalo(int primeiro, int ultimo, int total) {
+        int[] v = new int[total];
+        for (int i = 0; i < total; i++) {
+            v[i] = primeiro + i;
+        }
+        this.valoresIntervalo = v;
+    }
+    
+
+    // Métodos Personalizados (Pedidos na implementação do trabalho)
+
+    // (a)
+    public boolean contém(int valor) {
+        return ((this.inicio < valor && valor < this.fim) || 
+               (this.chaveInicio && valor == this.inicio) || 
+               (this.chaveFim && valor == this.fim));
+    }
+    
+   // (b)
+    public boolean intercepta(Intervalo outro) {
+        int inicioAtual = this.primeiroValorIntervalo();
+        int fimAtual = this.ultimoValorIntervalo();
+
+        int inicioOutro = outro.primeiroValorIntervalo();
+        int fimOutro = outro.ultimoValorIntervalo();
+
+        return !(fimAtual < inicioOutro || fimOutro < inicioAtual);
+    }
+
+    //Métodos Personalizados (Criados para facilitar algum processo do meu programa)
+
+    //Função que verifica as chaves
+    private boolean verifica(char chave){
+        if (chave == '[' || chave == ']'){
             return true;
         }
-        else {
-            if( ((this.inicioInclusivo == true) && (valor == this.inicio)) || ((this.fimInclusivo == true) && (valor == fim)) ){
-                return true;
+        else if (chave == '(' || chave == ')'){
+            return false;
+        }
+        else{
+            System.out.println("Não obedece os critérios das notações de intervalo. Por padrão, será usado (x, y)");
+            return false;
+        }
+    }
+
+    //Função que retorna o primeiro inteiro incluído no intervalo
+    private int primeiroValorIntervalo(){
+        if(getChaveInicio()){
+            return this.inicio;
+        }
+        else{
+            return (this.inicio+1);
+        }
+    }
+
+    //Função que retorna o último inteiro incluído no intervalo
+    private int ultimoValorIntervalo(){
+        if(getChaveFim()){
+            return this.fim;
+        }
+        else{
+            return (this.fim-1);
+        }
+    }
+
+    //Função que retorna o total de inteiros incluídos no intervalo
+    private int totalValores(){
+        return (ultimoValorIntervalo() - primeiroValorIntervalo() + 1);
+    }
+
+    //Função que imprime os inteiros incluídos no intervalo
+    public void imprimeIntervalo(){
+        int[] v = getvaloresIntervalo();
+        int total = totalValores();
+        int i = 0;
+        System.out.print("[");
+        while(i < total){
+            if(i != total-1){
+                System.out.print(v[i] + ", ");
+                i++;
             }
             else{
-            return false;
+            System.out.print(v[i]);
+            i++;
             }
         }
+        System.out.print("]");
     }
 }
